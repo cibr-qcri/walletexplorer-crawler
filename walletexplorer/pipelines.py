@@ -1,8 +1,9 @@
 import os
 from hashlib import sha256
 
+from .es7 import ES7
+
 from bs4 import BeautifulSoup
-from elasticsearch import Elasticsearch
 from scrapy.utils.project import get_project_settings
 
 
@@ -11,20 +12,7 @@ class WalletexplorerPipeline(object):
     def __init__(self):
         self.dirname = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         self.settings = get_project_settings()
-        self.server = self.settings['ELASTICSEARCH_CLIENT_SERVICE_HOST']
-        self.port = self.settings['ELASTICSEARCH_CLIENT_SERVICE_PORT']
-        self.port = int(self.port)
-        self.username = self.settings['ELASTICSEARCH_USERNAME']
-        self.password = self.settings['ELASTICSEARCH_PASSWORD']
-        self.index = self.settings['ELASTICSEARCH_INDEX']
-        self.type = self.settings['ELASTICSEARCH_TYPE_PROFILE']
-
-        if self.port:
-            uri = "http://%s:%s@%s:%d" % (self.username, self.password, self.server, self.port)
-        else:
-            uri = "http://%s:%s@%s" % (self.username, self.password, self.server)
-
-        self.es = Elasticsearch([uri])
+        self.es = ES7()
 
     def process_item(self, item, spider):
         timestamp = item["timestamp"]
@@ -74,11 +62,9 @@ class WalletexplorerPipeline(object):
         }
 
         if 'page' in response.url:
-            self.es.update(index=self.index, id=document_hash, body=update_tag)
+            self.es.persist_report(update_tag, document_hash)
         else:
-            self.es.index(index=self.index, id=document_hash, body=tag)
-
-        spider.logger.info("Page exported to ElasticSearch index %s at %s:%s" % (self.index, self.server, self.port))
+            self.es.persist_report(tag, document_hash)
 
         return item
 
