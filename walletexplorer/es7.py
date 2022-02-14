@@ -50,3 +50,6 @@ class ES7(metaclass=Singleton):
 
     def persist_report(self, report, es_id):
         self.es.index(index=self.index, id=es_id, body=report)
+
+    def update_report(self, report, es_id):
+        self.es.update(index=self.index, id=es_id, body=report)

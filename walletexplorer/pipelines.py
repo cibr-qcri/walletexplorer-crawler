@@ -62,7 +62,7 @@ class WalletexplorerPipeline(object):
         }
 
         if 'page' in response.url:
-            self.es.persist_report(update_tag, document_hash)
+            self.es.update_report(update_tag, document_hash)
         else:
             self.es.persist_report(tag, document_hash)
 
