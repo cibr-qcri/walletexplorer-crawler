@@ -1,0 +1,29 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: walletexplorer-deployment
+  labels:
+    app: walletexplorer
+    tier: walletexplorer
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: walletexplorer
+      tier: walletexplorer
+  template:
+    metadata:
+      labels:
+        app: walletexplorer
+        tier: walletexplorer
+    spec:
+      containers:
+        - name: walletexplorer
+          image: "{{ .Values.walletexplorer.image.name }}:{{ .Values.walletexplorer.image.tag }}"
+          imagePullPolicy: Always
+          {{- if .Values.elasticsearch_ip }}
+          env:
+            - name: elasticsearchIP
+              value: {{ .Values.elasticsearch_ip }}
+          {{- end }}
